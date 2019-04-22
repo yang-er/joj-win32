@@ -2,6 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace JudgeW32.Interop
 {
@@ -16,6 +17,41 @@ namespace JudgeW32.Interop
         {
             return Kernel32.CloseHandle(handle);
         }
+    }
+
+    [Flags]
+    public enum CreateProcessFlags : int
+    {
+        CreateBreakawayFromJob = 0x01000000,
+        CreateDefaultErrorMode = 0x04000000,
+        CreateNewConsole = 0x00000010,
+        CreateNewProcessGroup = 0x00000200,
+        CreateNoWindow = 0x08000000,
+        CreateProtectedProcess = 0x00040000,
+        CreatePreserveCodeAuthzLevel = 0x02000000,
+        CreateSeparateWowVDM = 0x00000800,
+        CreateSharedWowVDM = 0x00001000,
+        CreateSuspended = 0x00000004,
+        CreateUnicodeEnvironment = 0x00000400,
+        DebugOnlyThisProcess = 0x00000002,
+        DebugProcess = 0x00000001,
+        DetachedProcess = 0x00000008,
+        ExtendedStartupInfoPresent = 0x00080000,
+        InheritParentAffinity = 0x00010000
+    }
+
+    [Flags]
+    public enum StartFlag : uint
+    {
+        UseShowWindow = 0x00000001,
+        UseSize = 0x00000002,
+        UsePosition = 0x00000004,
+        UseCountChars = 0x00000008,
+        UseFillAttribute = 0x00000010,
+        RunFullScreen = 0x00000020,
+        ForceOnFeedback = 0x00000040,
+        ForceOffFeedback = 0x00000080,
+        UseStdHandles = 0x00000100,
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -41,7 +77,7 @@ namespace JudgeW32.Interop
         public int dwXCountChars;
         public int dwYCountChars;
         public int dwFillAttribute;
-        public int dwFlags;
+        public StartFlag dwFlags;
         public short wShowWindow;
         public short cbReserved2;
         public IntPtr lpReserved2;
@@ -75,16 +111,50 @@ namespace JudgeW32.Interop
         );
     }
 
+    internal partial class HandleOptions
+    {
+        internal const int DuplicateSameAccess = 2;
+        internal const int StillActive = 0x00000103;
+        internal const int TokenAdjustPrivileges = 0x20;
+    }
+
+    public sealed class ProcessWaitHandle : WaitHandle
+    {
+        internal ProcessWaitHandle(SafeProcessHandle processHandle)
+        {
+            SafeWaitHandle waitHandle = null;
+            SafeProcessHandle currentProcHandle = Interop.Kernel32.GetCurrentProcess();
+            bool succeeded = Interop.Kernel32.DuplicateHandle(
+                currentProcHandle,
+                processHandle,
+                currentProcHandle,
+                out waitHandle,
+                0,
+                false,
+                HandleOptions.DuplicateSameAccess);
+
+            if (!succeeded)
+            {
+                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+            }
+
+            this.SetSafeWaitHandle(waitHandle);
+        }
+    }
+
     public static partial class Kernel32
     {
+        [DllImport(Dll, SetLastError = true)]
+        public static extern SafeProcessHandle GetCurrentProcess();
+
         [DllImport(Dll, CharSet = CharSet.Unicode, SetLastError = true, BestFitMapping = false)]
-        public static extern bool CreateProcessW(
+        public static unsafe extern bool CreateProcessW(
             string lpApplicationName,
             [In] StringBuilder lpCommandLine,
-            ref SecurityAttributes procSecAttrs,
-            ref SecurityAttributes threadSecAttrs,
+            SecurityAttributes *procSecAttrs,
+            SecurityAttributes *threadSecAttrs,
             bool bInheritHandles,
-            int dwCreationFlags,
+            CreateProcessFlags dwCreationFlags,
             IntPtr lpEnvironment,
             string lpCurrentDirectory,
             ref StartupInfo lpStartupInfo,
