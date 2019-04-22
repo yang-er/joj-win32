@@ -7,6 +7,8 @@ namespace JudgeW32.Interop
 {
     public class SafeThreadHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
+        public SafeThreadHandle() : base(true) { }
+        public SafeThreadHandle(IntPtr handle) : base(true) { this.handle = handle; }
         public SafeThreadHandle(bool owns) : base(owns) { }
         public SafeThreadHandle(IntPtr handle, bool owns) : base(owns) { this.handle = handle; }
 

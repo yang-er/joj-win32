@@ -29,5 +29,25 @@
         /// 0xC0000135: 未找到动态链接库
         /// </summary>
         DllNotFound = -1073741515,
+
+        /// <summary>
+        /// 0xC0000409: 栈缓冲区不足
+        /// </summary>
+        StackBufferOverrun = -1073740791,
+
+        /// <summary>
+        /// 0xC000012D: 提交限制达到
+        /// </summary>
+        CommitmentLimit = -1073741523,
+
+        /// <summary>
+        /// 0xC000013A: 按下了Ctrl+C
+        /// </summary>
+        InterruptedByCtrlC = -1073741510,
+
+        /// <summary>
+        /// 0xC0000044: 限制达到
+        /// </summary>
+        QuotaExceeded = -1073741756,
     }
 }

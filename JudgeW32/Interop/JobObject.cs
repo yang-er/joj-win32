@@ -8,6 +8,8 @@ namespace JudgeW32.Interop
 {
     public class SafeJobObjectHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
+        public SafeJobObjectHandle() : base(true) { }
+        public SafeJobObjectHandle(IntPtr handle) : base(true) { this.handle = handle; }
         public SafeJobObjectHandle(bool owns) : base(owns) {}
         public SafeJobObjectHandle(IntPtr handle, bool owns) : base(owns) { this.handle = handle; }
 
@@ -15,6 +17,24 @@ namespace JudgeW32.Interop
         {
             return Kernel32.CloseHandle(handle);
         }
+    }
+
+    [Flags]
+    public enum UIRestrictions : uint
+    {
+        Desktop = 0x00000040,
+        DisplaySettings = 0x00000010,
+        ExitWindows = 0x00000080,
+        GlobalAtoms = 0x00000020,
+        Handles = 0x00000001,
+        ReadClipboard = 0x00000002,
+        SystemParameters = 0x00000008,
+        WriteClipboard = 0x00000004,
+    }
+
+    public struct JobObjectBasicUiRestrictions
+    {
+        public UIRestrictions UIRestrictionsClass;
     }
 
     public enum JobObjectInfoClass
@@ -82,7 +102,7 @@ namespace JudgeW32.Interop
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct JobObjectExtendedLimitInformation
+    public struct JobObjectExtendedLimitInformation
     {
         public JobObjectBasicLimitInformation BasicLimitInformation;
         public IoCounters IoInfo;
@@ -94,34 +114,34 @@ namespace JudgeW32.Interop
 
     public static partial class Kernel32
     {
-        [DllImport("kernel32.dll")]
-        public static extern bool SetInformationJobObject(
+        [DllImport(Dll, SetLastError = true)]
+        public static unsafe extern bool SetInformationJobObject(
             SafeJobObjectHandle hJob,
             JobObjectInfoClass JobObjectInfoClass,
-            IntPtr lpJobObjectInfo,
-            uint cbJobObjectInfoLength);
+            void* lpJobObjectInfo,
+            int cbJobObjectInfoLength);
 
-        [DllImport("kernel32.dll")]
+        [DllImport(Dll, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool AssignProcessToJobObject(
             SafeJobObjectHandle hJob,
             SafeProcessHandle hProcess
         );
 
-        [DllImport("kernel32.dll")]
+        [DllImport(Dll, SetLastError = true)]
         public static extern bool IsProcessInJob(
             SafeProcessHandle hProcess,
             SafeJobObjectHandle hJob,
             out bool bResult
         );
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        [DllImport(Dll, SetLastError = true, CharSet = CharSet.Unicode)]
         public static unsafe extern SafeJobObjectHandle CreateJobObjectW(
             [In] SecurityAttributes *lpJobAttributes,
             string lpName
         );
 
-        [DllImport("Kernel32.dll", SetLastError = true)]
+        [DllImport(Dll, SetLastError = true)]
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         [SuppressUnmanagedCodeSecurity]
         public static extern bool TerminateJobObject(
