@@ -122,13 +122,12 @@ namespace JudgeW32.Interop
     {
         internal ProcessWaitHandle(SafeProcessHandle processHandle)
         {
-            SafeWaitHandle waitHandle = null;
-            SafeProcessHandle currentProcHandle = Interop.Kernel32.GetCurrentProcess();
-            bool succeeded = Interop.Kernel32.DuplicateHandle(
+            var currentProcHandle = Kernel32.GetCurrentProcess();
+            bool succeeded = Kernel32.DuplicateHandle(
                 currentProcHandle,
                 processHandle,
                 currentProcHandle,
-                out waitHandle,
+                out SafeWaitHandle waitHandle,
                 0,
                 false,
                 HandleOptions.DuplicateSameAccess);
@@ -146,6 +145,9 @@ namespace JudgeW32.Interop
     {
         [DllImport(Dll, SetLastError = true)]
         public static extern SafeProcessHandle GetCurrentProcess();
+
+        [DllImport(Dll, SetLastError = true)]
+        public static extern bool GetExitCodeProcess(SafeProcessHandle processHandle, out int exitCode);
 
         [DllImport(Dll, CharSet = CharSet.Unicode, SetLastError = true, BestFitMapping = false)]
         public static unsafe extern bool CreateProcessW(

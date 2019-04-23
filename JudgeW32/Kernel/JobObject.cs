@@ -4,7 +4,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-namespace JudgeW32
+namespace JudgeW32.Kernel
 {
     public class JobObject : IDisposable
     {

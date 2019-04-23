@@ -16,13 +16,13 @@ namespace JudgeW32.Interop
         const string Dll = "kernel32.dll";
 
         [DllImport(Dll, SetLastError = true)]
-        internal static extern bool CloseHandle(IntPtr handle);
+        public static extern bool CloseHandle(IntPtr handle);
 
         [DllImport(Dll, SetLastError = true)]
-        static extern uint WaitForSingleObject(SafeProcessHandle hHandle, uint dwMilliseconds);
+        public static extern uint WaitForSingleObject(SafeProcessHandle hHandle, uint dwMilliseconds);
 
         [DllImport(Dll, SetLastError = true)]
-        public static extern SafePipeHandle GetStdHandle(
+        public static extern SafeFileHandle GetStdHandle(
             StdHandle nStdHandle
         );
 
@@ -38,9 +38,20 @@ namespace JudgeW32.Interop
         );
 
         [DllImport(Dll, SetLastError = true)]
+        public static extern bool DuplicateHandle(
+            SafeProcessHandle hSourceProcessHandle,
+            SafeFileHandle hSourceHandle,
+            SafeProcessHandle hTargetProcessHandle,
+            out SafeFileHandle lpTargetHandle,
+            uint dwDesiredAccess,
+            bool bInheritHandle,
+            uint dwOptions
+        );
+
+        [DllImport(Dll, SetLastError = true)]
         public static extern bool CreatePipe(
-            out SafePipeHandle hReadPipe,
-            out SafePipeHandle hWritePipe,
+            out SafeFileHandle hReadPipe,
+            out SafeFileHandle hWritePipe,
             ref SecurityAttributes lpPipeAttributes,
             int nSize
         );
