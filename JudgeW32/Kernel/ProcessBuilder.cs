@@ -27,6 +27,10 @@ namespace JudgeW32.Kernel
 
         public StreamWriter Input => inWriter;
 
+        public StringBuilder Output => Out;
+
+        public StringBuilder Error => Err;
+
         public ProcessBuilder()
         {
             flags |= CreateProcessFlags.CreateUnicodeEnvironment;
@@ -96,11 +100,13 @@ namespace JudgeW32.Kernel
         }
 
         public ProcessBuilder UseStdRedirect(
-            bool @in, StringBuilder @out, StringBuilder err)
+            bool @in, bool @out, bool err)
         {
             if (proc != null) throw new InvalidOperationException();
             stf |= StartFlag.UseStdHandles;
-            useIn = @in; Out = @out; Err = err;
+            useIn = @in;
+            if (@out) Out = new StringBuilder();
+            if (@err) Err = new StringBuilder();
             return this;
         }
 

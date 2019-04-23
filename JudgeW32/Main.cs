@@ -25,7 +25,7 @@ namespace JudgeW32
                 using (var proc = new ProcessBuilder())
                 {
                     proc.UsePipeRedirect((s, _) => Console.WriteLine(s))
-                        .UseStdRedirect(true, new StringBuilder(), new StringBuilder())
+                        .UseStdRedirect(true, true, true)
                         .UseWorkingDir("C:\\")
                         .AssignTo(jo)
                         .UseArgument("cmd /k dir")
