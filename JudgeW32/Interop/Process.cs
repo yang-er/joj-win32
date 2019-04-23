@@ -111,16 +111,16 @@ namespace JudgeW32.Interop
         );
     }
 
-    internal partial class HandleOptions
+    public partial class HandleOptions
     {
-        internal const int DuplicateSameAccess = 2;
-        internal const int StillActive = 0x00000103;
-        internal const int TokenAdjustPrivileges = 0x20;
+        public const int DuplicateSameAccess = 2;
+        public const int StillActive = 0x00000103;
+        public const int TokenAdjustPrivileges = 0x20;
     }
 
     public sealed class ProcessWaitHandle : WaitHandle
     {
-        internal ProcessWaitHandle(SafeProcessHandle processHandle)
+        public ProcessWaitHandle(SafeProcessHandle processHandle)
         {
             var currentProcHandle = Kernel32.GetCurrentProcess();
             bool succeeded = Kernel32.DuplicateHandle(
@@ -163,7 +163,14 @@ namespace JudgeW32.Interop
             ref ProcessInformation lpProcessInformation
         );
 
-        [DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport(Dll, SetLastError = true)]
         public static extern uint ResumeThread(SafeThreadHandle hThread);
+
+        [DllImport(Dll, SetLastError = true)]
+        public static extern uint ResumeThread(IntPtr hThread);
+
+        [DllImport(Dll, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool TerminateProcess(IntPtr hProcess, int uExitCode);
     }
 }

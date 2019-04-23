@@ -23,8 +23,8 @@ namespace JudgeW32.Interop
     [StructLayout(LayoutKind.Sequential)]
     public struct SecurityAttributes
     {
-        internal uint nLength;
-        internal IntPtr lpSecurityDescriptor;
-        internal BOOL bInheritHandle;
+        public uint nLength;
+        public IntPtr lpSecurityDescriptor;
+        public BOOL bInheritHandle;
     }
 }
