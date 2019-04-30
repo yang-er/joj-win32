@@ -15,11 +15,11 @@ namespace JudgeW32.Kernel
         private readonly SafeProcessHandle proc;
         private readonly Pipe stdin, stdout, stderr;
 
-        public StreamReader StandardOutput { get; }
+        public Stream StandardOutput { get; }
 
-        public StreamReader StandardError { get; }
+        public Stream StandardError { get; }
 
-        public StreamWriter StandardInput { get; }
+        public Stream StandardInput { get; }
 
         public Process(SafeProcessHandle hProc)
         {
@@ -33,12 +33,9 @@ namespace JudgeW32.Kernel
             stdout = @out;
             stderr = @err;
 
-            StandardInput = @in is null ? null :
-                new StreamWriter(stdin.GetParentAsStream(), enc, 4096);
-            StandardOutput = @out is null ? null :
-                new StreamReader(stdout.GetParentAsStream(), enc);
-            StandardError = @err is null ? null :
-                new StreamReader(stderr.GetParentAsStream(), enc);
+            StandardInput = @in is null ? null : stdin.GetParentAsStream();
+            StandardOutput = @out is null ? null : stdout.GetParentAsStream();
+            StandardError = @err is null ? null : stderr.GetParentAsStream();
         }
 
         public bool Terminate(int exitCode = 0)

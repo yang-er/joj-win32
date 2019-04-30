@@ -2,8 +2,6 @@
 using JudgeW32.Kernel;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,6 +30,7 @@ namespace JudgeW32.Pipeline
 
             var penv = new ProcessBuilder();
             penv.UseExecutable(Options.ExecutableFile);
+
             if (Options.Arguments != null)
                 penv.UseArgument(Options.Arguments);
             if (Options.WorkingDirectory != null)
@@ -50,6 +49,9 @@ namespace JudgeW32.Pipeline
 
                 proc.WaitForExit(Math.Max(Options.TimeLimit * 10, 10000));
                 jobObj.Terminate(unchecked((uint)Interop.ErrorCode.QuotaExceeded));
+                cts.Cancel();
+
+                await Task.WhenAll(stats);
                 IOPort = null;
             }
         }
