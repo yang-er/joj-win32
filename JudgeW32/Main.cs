@@ -12,7 +12,6 @@ namespace JudgeW32
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             Interop.Wer.AddExcludedApplication("test_memlimit.exe", false);
-            var encoding = Encoding.GetEncoding(936);
 
             var sandboxBuilder = new SandboxBuilder()
                 .UserTime(100000)
@@ -20,33 +19,22 @@ namespace JudgeW32
                 .Memory(800 << 10)
                 .ForbidSysCall();
 
+            var procBuilder = new ProcessBuilder()
+                // .UseStdStream(true, true, true)
+                .UseWorkingDir("C:\\")
+                .UseArgument("cmd /k dir")
+                .UseEncoding(Encoding.GetEncoding(936))
+                .UseExecutable("C:\\windows\\system32\\cmd.exe");
+
             using (var jo = sandboxBuilder.Build())
+            using (var proc = procBuilder.Build(jo))
             {
-                using (var proc = new ProcessBuilder())
-                {
-                    proc.UsePipeRedirect((s, _) => Console.WriteLine(s))
-                        .UseStdRedirect(true, true, true)
-                        .UseWorkingDir("C:\\")
-                        .AssignTo(jo)
-                        .UseArgument("cmd /k dir")
-                        .UseEncoding(Encoding.GetEncoding(936))
-                        .UseExecutable("C:\\windows\\system32\\cmd.exe")
-                        .Build();
-
-                    Task.Delay(1000).ContinueWith(t =>
-                    {
-                        for (int i = 0; i < 10; i++)
-                        {
-                            proc.Input.WriteLine("Hello~");
-                        }
-
-                        proc.Input.Flush();
-                        proc.Input.Close();
-                    });
-
-                    proc.WaitForExit(10000);
-                    jo.Terminate(0);
-                }
+                proc.WaitForExit(10000);
+                jo.Terminate(unchecked((uint)-1));
+                int code = proc.GetExitCode();
+                long mem = proc.GetPeakMemory();
+                var st = proc.GetProcessTimes();
+                Console.WriteLine($"Exit code 0x{code:x}, peak mem {mem / 1024}k, user time {st.user/1000}ms");
             }
         }
     }

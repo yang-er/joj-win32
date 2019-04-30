@@ -89,7 +89,7 @@ namespace JudgeW32.Interop
     [StructLayout(LayoutKind.Sequential, Size = 72)]
     public struct ProcessMemoryCounters
     {
-        public uint cb;
+        public int cb;
         public uint PageFaultCount;
         public ulong PeakWorkingSetSize;
         public ulong WorkingSetSize;
@@ -106,8 +106,8 @@ namespace JudgeW32.Interop
         [DllImport("psapi.dll", SetLastError = true)]
         public static extern bool GetProcessMemoryInfo(
             SafeProcessHandle hProcess,
-            out ProcessMemoryCounters counters,
-            uint size
+            ref ProcessMemoryCounters counters,
+            int size
         );
     }
 
@@ -143,6 +143,9 @@ namespace JudgeW32.Interop
 
     public static partial class Kernel32
     {
+        [DllImport(Dll, CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern bool GetProcessTimes(SafeProcessHandle handle, out long creation, out long exit, out long kernel, out long user);
+
         [DllImport(Dll, SetLastError = true)]
         public static extern SafeProcessHandle GetCurrentProcess();
 
