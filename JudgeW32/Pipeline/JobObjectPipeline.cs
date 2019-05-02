@@ -49,8 +49,8 @@ namespace JudgeW32.Pipeline
 
                 proc.WaitForExit(Math.Max(Options.TimeLimit * 10, 10000));
                 jobObj.Terminate(unchecked((uint)Interop.ErrorCode.QuotaExceeded));
+                proc.ClosePipes();
                 cts.Cancel();
-
                 await Task.WhenAll(stats);
                 IOPort = null;
             }

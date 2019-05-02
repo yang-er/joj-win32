@@ -76,17 +76,27 @@ namespace JudgeW32.Kernel
             return (long)pmc.PeakWorkingSetSize;
         }
 
+        private void CloseStreams()
+        {
+            StandardInput?.Dispose();
+            StandardOutput?.Dispose();
+            StandardError?.Dispose();
+        }
+
+        public void ClosePipes()
+        {
+            stdin?.ChildrenHandle.Close();
+            stdout?.ChildrenHandle.Close();
+            stderr?.ChildrenHandle.Close();
+        }
+
         public void Dispose()
         {
             if (!isDisposed)
             {
                 isDisposed = true;
-                StandardInput?.Dispose();
-                StandardOutput?.Dispose();
-                StandardError?.Dispose();
-                stdin?.Dispose();
-                stdout?.Dispose();
-                stderr?.Dispose();
+                CloseStreams();
+                ClosePipes();
                 proc?.Dispose();
             }
         }
